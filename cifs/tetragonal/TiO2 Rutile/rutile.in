@@ -1,0 +1,27 @@
+! Reference: https://materialsproject.org/materials/mp-2657/  
+
+rutile := xtb(
+    structure( fractional=[[Ti,  0.000000,  0.000000,  0.000000],
+                           [Ti,  0.500000,  0.500000,  0.500000],
+                           [ O,  0.695526,  0.695526,  0.000000],
+                           [ O,  0.304474,  0.304474,  0.000000],
+                           [ O,  0.195526,  0.804474,  0.500000],
+                           [ O,  0.804474,  0.195526,  0.500000]]
+               lattice( a = 4.6068 angstrom
+	                c = 2.9916 angstrom
+                        bravais = tetragonal
+                       )
+             )
+
+   repulsive_cutoff = 40.0 bohr
+   overlap_cutoff = 40.0 bohr
+   h0_cutoff = 40.0 bohr
+   temperature = 0 kelvin
+
+   ewald_real_cutoff = 10 bohr
+   ewald_reciprocal_cutoff = 2
+   ewald_alpha = 0.5
+
+   monkhorst_pack = [2, 2, 2]
+   symmetry_reduction = false
+)
