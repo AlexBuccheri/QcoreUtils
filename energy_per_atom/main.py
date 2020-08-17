@@ -6,9 +6,9 @@
 import collections
 
 from crystal_system import cubic
-from pymatgen_wrappers import cif_parser_wrapper
-import qcore_input_strings as qcore_input
-from utils import Set
+from src.pymatgen_wrappers import cif_parser_wrapper
+from src import qcore_input_strings as qcore_input
+from src.utils import Set
 
 
 def primitive_copper():
