@@ -44,6 +44,7 @@ plt.plot(r_values, xtb_standard, label="Xtb sqrt(1/|r|^2+eta^-2)")
 plt.legend()
 plt.ylim(-10, 20)
 plt.xlim(0, 1)
-plt.show()
+#plt.yscale("log")
+#plt.xscale("log")
 plt.show()
 """ Plot shows: If one cuts off the """
