@@ -6,9 +6,9 @@ import subprocess
 import json
 
 from crystal_system import cubic
-from pymatgen_wrappers import cif_parser_wrapper
-import qcore_input_strings as qcore_input
-from utils import Set
+from src.pymatgen_wrappers import cif_parser_wrapper
+from src import qcore_input_strings as qcore_input
+from src.utils import Set
 
 
 def convention_sodium_chloride(named_result, ewald):
@@ -32,7 +32,7 @@ def convention_sodium_chloride(named_result, ewald):
 named_result = "conventional_nacl"
 
 def run_qcore(input_string):
-    qcore_exe = '/Users/alexanderbuccheri/Codes/entos/cmake-build-debug/entos'
+    qcore_exe = '/Users/alexanderbuccheri/Codes/entos/cmake-build-debug/qcore'
     qcore_command = [qcore_exe, '--format', 'json', '-s', input_string.replace('\n', ' ')]
     try:
         # Can't write any stderr to stdout as this will mess up the JSON format and hence can't parse
