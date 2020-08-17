@@ -33,7 +33,9 @@ fcc_cifs = {
             'sodium_chloride': FileUrl("cifs/cubic/FCC/NaCl/NaCl_mp-22862_primitive.cif",
                                         "https://materialsproject.org/materials/mp-22862/"),
             'magnesium_oxide': FileUrl("cifs/cubic/FCC/MgO/MgO_mp-1265_primitive.cif",
-                                       "https://materialsproject.org/materials/mp-1265/")
+                                       "https://materialsproject.org/materials/mp-1265/"),
+            'lithium_hydride': FileUrl("cifs/cubic/FCC/LiH/LiH_mp-23703_primitive.cif",
+                                       "https://materialsproject.org/materials/mp-23703/")
             }
 
 # FCC but the lattice vectors are cubic
