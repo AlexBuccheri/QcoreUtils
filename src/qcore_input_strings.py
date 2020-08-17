@@ -4,8 +4,7 @@
 
 import typing
 
-import space_groups  # space_group_to_bravais, qcore_bravais_lattices
-import utils         # substitute_positions
+from src import space_groups, utils
 
 
 def atoms_string(n_atoms: int, position_key: str) -> str:
@@ -180,7 +179,10 @@ def commands_to_string(commands: dict, indent=1) -> str:
 
     for command, rhs in commands.items():
         assert isinstance(command, str)
-        commands_string += indent + command + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
+        if isinstance(rhs, utils.Set):
+            commands_string += indent + command + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
+        else:
+            commands_string += indent + command + " = " + rhs + '\n'
 
     return commands_string
 

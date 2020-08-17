@@ -6,7 +6,7 @@
     file path to cif
 """
 
-from utils import Set, FileUrl
+from src.utils import Set
 
 # Cubic crystals by bravais lattice
 # Space groups: 143 - 167.

@@ -4,7 +4,7 @@ import collections
 import sys
 import warnings
 
-import unit_conversions    # angstrom_to_bohr
+from src import unit_conversions
 
 
 class Set():

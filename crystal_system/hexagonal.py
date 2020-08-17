@@ -8,8 +8,7 @@
   boron nitride is tabulated.
 """
 
-from utils import Set, FileUrl
-
+from src.utils import Set
 
 # Hexagonal crystals by bravais lattice
 # Space groups: 168 - 194

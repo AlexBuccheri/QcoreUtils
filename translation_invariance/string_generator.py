@@ -1,6 +1,5 @@
+from src import qcore_input_strings as qcore_input, utils
 
-import qcore_input_strings as qcore_input
-import utils
 
 def xtb_translational_invariance_string(
         crystal: dict, settings: dict, assertions: dict, shift: float, named_result: str, comments='') -> str:

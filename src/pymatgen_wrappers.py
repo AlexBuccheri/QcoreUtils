@@ -6,8 +6,8 @@ import typing
 import pymatgen.io.cif
 from pymatgen.core.structure import Structure
 
-from utils import Set
-import space_groups
+from src.utils import Set
+from src import space_groups
 
 
 def lattice_parameters_from_cif(structure, length_unit='angstrom', angle_unit='degree') \

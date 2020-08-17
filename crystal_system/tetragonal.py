@@ -8,8 +8,7 @@
   rutile and anatase details are tabulated.
 """
 
-from utils import Set, FileUrl
-
+from src.utils import Set
 
 # Cubic crystals by bravais lattice
 # Space groups: 75 - 142.
@@ -25,7 +24,7 @@ body_centred_tetragonal_cifs = {}
 # Avoid additional tabulating and use cif_parser_wrapper to generate
 # these dictionaries.
 
-def tio2_rutile():
+def tio2_rutile() -> dict:
 
     """
     TiO2 Rutile.
@@ -45,7 +44,7 @@ def tio2_rutile():
     bravais = 'tetragonal'
     space_group = 136
     lattice_parameters = {'a': Set(4.6068, 'angstrom'), 'c': Set(2.9916, 'angstrom')}
-    data = {'fractional' :positions,
+    data = {'fractional': positions,
             'species': species,
             'lattice_parameters': lattice_parameters,
             'space_group': ('', space_group),
@@ -54,7 +53,7 @@ def tio2_rutile():
     return data
 
 
-def tio2_anatase():
+def tio2_anatase() -> dict:
 
     """
     TiO2 Anatase. Space group:  I4_1/amd (141)

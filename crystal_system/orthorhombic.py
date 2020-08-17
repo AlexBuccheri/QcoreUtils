@@ -8,7 +8,7 @@
   calcium titanate, and aluminum hexathiohypodiphosphate details are tabulated.
 """
 
-from utils import Set, FileUrl
+from src.utils import Set
 
 # Orthorhombic crystals by bravais lattice
 # Space groups: 16 - 74

@@ -7,9 +7,6 @@
 
 """
 
-from utils import Set, FileUrl
-
-
 # Monoclinic crystals by bravais lattice
 # Space groups: 3-15.
 

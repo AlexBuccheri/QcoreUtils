@@ -8,7 +8,7 @@
   silicon, diamond and germanium details are tabulated.
 """
 
-from utils import Set, FileUrl
+from src.utils import Set, FileUrl
 
 
 # Cubic crystals by bravais lattice
@@ -31,15 +31,19 @@ fcc_cifs = {
             'boron_nitride': FileUrl("cifs/cubic/FCC/BN-cubic/BN_mp-1639_primitive.cif",
                                       "https://materialsproject.org/materials/mp-1639/"),
             'sodium_chloride': FileUrl("cifs/cubic/FCC/NaCl/NaCl_mp-22862_primitive.cif",
-                                        "https://materialsproject.org/materials/mp-22862/")
+                                        "https://materialsproject.org/materials/mp-22862/"),
+            'magnesium_oxide': FileUrl("cifs/cubic/FCC/MgO/MgO_mp-1265_primitive.cif",
+                                       "https://materialsproject.org/materials/mp-1265/")
             }
 
 # FCC but the lattice vectors are cubic
 conventional_fcc_cifs = {
             'copper': FileUrl("cifs/cubic/FCC/Cu/Cu_mp-30_conventional_standard.cif",
-                              "Cu_mp-30_conventional_standard"),
+                              "https://materialsproject.org/materials/mp-30/"),
             'sodium_chloride': FileUrl("cifs/cubic/FCC/NaCl/NaCl_mp-22862_conventional_standard.cif",
-                                        "https://materialsproject.org/materials/mp-22862/")
+                                        "https://materialsproject.org/materials/mp-22862/"),
+            'magnesium_oxide': FileUrl("cifs/cubic/FCC/MgO/MgO_mp-1265_conventional_standard.cif",
+                                       "https://materialsproject.org/materials/mp-1265/")
             }
 
 # Crystals without cif files

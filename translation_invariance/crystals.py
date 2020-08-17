@@ -2,9 +2,9 @@
 
 import collections
 
-from utils import Set
-from crystal_system import cubic, tetragonal, hexagonal, trigonal, orthorhombic, monoclinic, triclinic
-from pymatgen_wrappers import cif_parser_wrapper
+from src.utils import Set
+from crystal_system import cubic, tetragonal, hexagonal, trigonal
+from src.pymatgen_wrappers import cif_parser_wrapper
 from translation_invariance.string_generator import xtb_translational_invariance_string as translation_string
 
 
