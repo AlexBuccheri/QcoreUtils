@@ -1,8 +1,8 @@
 """  Compute energy vs volume curves """
+
 import numpy as np
 import collections
 import matplotlib.pyplot as plt
-
 
 from crystal_system import cubic
 from src.pymatgen_wrappers import cif_parser_wrapper
@@ -10,48 +10,18 @@ from src.utils import Set
 from src import qcore_input_strings as qcore_input
 from src.run_qcore import run_qcore
 
-# def atomic_positions(crystal: dict, lattice_constant_factors: np.ndarray) -> tuple:
-#     """
-#     Get atomic positions for each choice of lattice constant
-#
-#     Expects simple cubic systems, although this would work in any case,
-#     I'd just need to either a) suply lattice vectors or b) build lattice vectors
-#     for any bravais lattice
-#
-#     :param crystal: dictionary containing crystal information from cif file
-#     :param scaling: Lattice parameter scaling factors
-#     :return: sets_of_positions : crystal positions for each lattice constant with units
-#     of crystal['lattice_parameters']['a'].unit
-#     """
-#
-#     assert len(crystal['lattice_parameters'].keys()) == 1, \
-#         "Must only have one lattice parameter to uniformly increase volume"
-#
-#     keys = [key for key in crystal.keys()]
-#     assert 'fractional' in keys, "Positions should be in fractional coordinates"
-#
-#     bulk_positions = np.asarray(crystal['fractional'])
-#     a_bulk = [a.value for a in crystal['lattice_parameters'].values()][0]
-#
-#     sets_of_positions = []
-#     for lattice_constant_factor in lattice_constant_factors:
-#         lattice_constant = lattice_constant_factor * a_bulk
-#         # Works because lattice is simple cubic, else matmul(lattice, bulk_positions)
-#         positions = (lattice_constant * bulk_positions).tolist()
-#         sets_of_positions.append(positions)
-#
-#     return sets_of_positions
 
-
-def cubic_lattice_constants(crystal: dict, lattice_constant_factors: np.ndarray):
+def cubic_lattice_constants(crystal: dict, lattice_constant_factors: np.ndarray)\
+        -> np.ndarray:
     """
     Get lattice constants for energy vs volume curves of cubic systems
     Performs checks and balances.
     Expects cubic systems i.e. one lattice parameter.
 
-    :param crystal: dictionary containing crystal information from cif file
-    :param scaling: Lattice parameter scaling factors
-    :return:
+    :param crystal : dictionary containing crystal information from cif file
+    :param scaling : Lattice parameter scaling factors
+    :return : Array of lattice constants in whatever unit the crystal['lattice_parameters']
+    are in (i.e. the unit of the cif file, which I believe is always angstrom)
     """
     assert crystal['bravais'] in ['cubic', 'bcc', 'fcc'], "crystal must be some form of cubic"
 
@@ -94,7 +64,9 @@ def magnesium_oxide():
         ('h0_cutoff',               Set(40, 'bohr')),
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
+        # Ewald setting for hard-cutoff of potential at 30 bohr
         ('ewald_real_cutoff',       Set(40, 'bohr')),
+        # Converged w.r.t. real-space value
         ('ewald_reciprocal_cutoff', Set(10)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
@@ -122,7 +94,6 @@ def magnesium_oxide():
 lattice_constant_factors, total_energies = magnesium_oxide()
 plt.plot(lattice_constant_factors, total_energies, label="MgO conventional")
 plt.legend()
-#plt.xlim(0, 1)
 plt.xlabel("Lattice constant (bulk constant)")
 plt.ylabel("Total energy (Ha)")
 plt.show()
