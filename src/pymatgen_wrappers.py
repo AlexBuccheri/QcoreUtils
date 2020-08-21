@@ -3,11 +3,18 @@
 """
 
 import typing
+import os
 import pymatgen.io.cif
 from pymatgen.core.structure import Structure
 
 from src.utils import Set
 from src import space_groups
+
+# If Alex's set of modules is available
+python_paths = os.environ['PYTHONPATH'].split(os.pathsep)
+sub_dirs = [path.split('/')[-1] for path in python_paths]
+if 'Python' in sub_dirs:
+    import modules.electronic_structure.structure.bravais as lattices
 
 
 def lattice_parameters_from_cif(structure, length_unit='angstrom', angle_unit='degree') \
@@ -107,7 +114,8 @@ def remove_superflous_parameters(lattice_parameters: dict, bravais: str) -> dict
     return required_lattice_parameters
 
 
-def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, bravais=None) -> typing.Dict:
+def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, bravais=None,
+                       remove_unused_parameters=True) -> typing.Dict:
 
     """
     Wrapper for pymatgen's cif parser.
@@ -130,6 +138,8 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
        Uses fractional as default
     bravais : str, optional
        bravais lattice type. Required if unit cell is not primitive
+    remove_unused_parameters : bool, optional
+       Remove lattice parameters that are not required in the Qcore input
 
     Returns
     -------
@@ -167,8 +177,17 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
         bravais = space_groups.space_group_to_bravais(sg[1])
 
     lattice_parameters = lattice_parameters_from_cif(structure)
+
+    # Compare tabulated lattice angles against those computed from lattice vectors
+    # Make sure they agree
+    #if 'Python' in sub_dirs:
+    # TODO(Alex) need to modify this function to take kargs
+    #    lattice_fn = lattices.get_lattice_vectors(bravais, lattice_parameters)
+
+
     # Required for qCore input
-    lattice_parameters = remove_superflous_parameters(lattice_parameters, bravais)
+    if remove_unused_parameters:
+        lattice_parameters = remove_superflous_parameters(lattice_parameters, bravais)
     species = [element_enum.value for element_enum in structure.species]
     assert len(species) == len(positions)
 
@@ -178,5 +197,7 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
                    'space_group': sg,
                    'bravais': bravais,
                    'n_atoms': len(species)}
+
+
 
     return crystal_data
