@@ -178,11 +178,8 @@ def commands_to_string(commands: dict, indent=1) -> str:
     commands_string = ""
 
     for command, rhs in commands.items():
-        assert isinstance(command, str)
-        if isinstance(rhs, utils.Set):
-            commands_string += indent + command + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
-        else:
-            commands_string += indent + command + " = " + rhs + '\n'
+        assert isinstance(command, str), "Command isn't a string - passing command incorrectly"
+        commands_string += indent + command + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
 
     return commands_string
 
