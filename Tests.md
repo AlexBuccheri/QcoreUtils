@@ -1,33 +1,38 @@
 
 # List of Bravais Lattices
 1. Simple cubic: 
-    * 
+    * N2, one more 
 2. BCC:
-    *
+    * PICK ONE
 3. FCC:
-    * 
+    * silicon, germanium, diamond
+    * cubic Boron nitride, copper, MgO, NaCl, PbS, LiH  
 4. Simple tetragonal:
-    *
+    * TiO2 rutile, add another
 5. BC tetragonal:
-    *
+    * TiO2 anatase
 6. Hexagonal:
-    *
+    * CdSe, unbuckled graphene
 7. Rhombohedral
-    *
+    * MoS2 (download), other
 8. Simple orthorhombic
-    *
+    * Pick 2
 9. Base-centred orthorhombic
-    *
+    * NEED
 10. Body-centred orthorhombic
-    *
+    * NEED
 11. Face-centred orthorhombic
-    *
+    * NEED
 12. Simple monoclinic
-    *
+    * Try LiSn and PdCl2
 13. Base-centred monoclinic
-    *
+    * Ga2O2, other?
 14. Triclinic 
-    *
+    * NEED
+
+###### Sources
+* Materials Project: https://materialsproject.org
+* AFLOW: http://aflow.org/search/advanced.php  **Find the link from Rui**
 
 #Tests
 * Tests should cover each Bravais lattice, listed above. 
