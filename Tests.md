@@ -40,11 +40,25 @@
 * Different temperatures: At 0k, 300k, 1000k
 * SCF and SCC 
 
+## Test Settings
+* Use high precision
+* Bohr is better than angstrom (internal unit conversion factor will change in 2020)
+* Better to use fractions rather than decimals i.e. 1/3 instead of 0.333
+
+
+## Trinclinc
+Should put one crystal system in as a trinclinic lattice and confirm it gives the
+correct results 
+
 
 ### Translational Invariance 
 * Translate all atoms in the cell by some arbitrary amount 
 * Expect the energy to be invariant w.r.t. translation. 
 
+
+### Elemental Crystals
+* Benchmark band structure and DOS for every elemental crystal that's parameterised
+    * See README in the corresponding subfolder 
 
 
 ### Converged Total Energy of Primitive Cell 
