@@ -15,10 +15,14 @@ from src.utils import Set, FileUrl
 # Space groups: 195-230.
 
 # Any space group beginning with P
-cubic_cifs = {}
+cubic_cifs = {'alpha-N2': FileUrl("cifs/cubic/Simple/alpha-N2/N2_mp-25_primitive.cif",
+                                  "https://materialsproject.org/materials/mp-25/")
+              }
 
 # Any space group beginning with I
-bcc_cifs = {}
+bcc_cifs = {'potassium': FileUrl("cifs/cubic/BCC/potassium/K_mp-58_primitive.cif",
+                                 "https://materialsproject.org/materials/mp-58/")
+            }
 
 # Any space group beginning with F
 fcc_cifs = {
