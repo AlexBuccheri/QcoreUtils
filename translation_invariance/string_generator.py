@@ -40,7 +40,7 @@ def xtb_translational_invariance_string(
     structure_no_shift = qcore_input.get_xtb_periodic_structure_string(crystal)
 
     # All other options
-    other_options = qcore_input.commands_to_string(settings)
+    other_options = qcore_input.option_to_string(settings)
 
     # Assertions: Same values but different named results
     assertions_noshift = qcore_input.assertions_string(nr_noshift, assertions)

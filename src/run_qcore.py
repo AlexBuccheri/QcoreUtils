@@ -17,6 +17,7 @@ def get_named_result(input_string: str) -> str:
         raise Exception("Unable to find named result in ", input_string)
 
 
+#TODO(Alex) Tidy up the return if error
 def run_qcore(input_string: str, exe_type="debug") -> dict:
     """
     Run qcore, get the JSON output via stdout and

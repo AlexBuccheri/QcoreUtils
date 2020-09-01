@@ -6,6 +6,7 @@ import warnings
 
 from src import unit_conversions
 
+default_named_result = 'xtb_calc'
 
 class Set():
     """ Container for value and unit  """

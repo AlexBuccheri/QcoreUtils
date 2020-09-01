@@ -152,36 +152,72 @@ def get_xtb_periodic_structure_string(crystal: dict) -> str:
     return structure_string(atoms_str, lattice_str)
 
 
-def commands_to_string(commands: dict, indent=1) -> str:
+def option_to_string(options: dict, indent=1) -> str:
 
     """
-    Create a string of qcore input commands
+    Create a string of qcore input options
 
     Parameters
     ----------
-    commands : dict
+    options : dict
        A dictionary of qcore commands (as keys) and values with units (as value).
-       For example, command, value = commands.items()
+       For example, option, value = commands.items()
        and value is an object accessed as value.value and value.unit
 
     Returns
     -------
     commands_string : str
-       String of input entries, each of the form: command = value unit \n
+       String of input entries, each of the form: option = value unit \n
 
-    Notes
-      Could expand to work with nested dictionaries
     """
 
     generic_str = utils.generic_str
-    indent = ' ' * indent
-    commands_string = ""
 
-    for command, rhs in commands.items():
-        assert isinstance(command, str), "Command isn't a string - passing command incorrectly"
-        commands_string += indent + command + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
+    if isinstance(indent, int):
+        indent = ' ' * indent
+    else:
+        assert isinstance(indent, (str, int)), "indent must be str or int"
+
+    commands_string = ""
+    for option, rhs in options.items():
+        assert isinstance(option, str), "option isn't a string - passing option incorrectly"
+        commands_string += indent + option + " = " + generic_str(rhs.value) + " " + rhs.unit + '\n'
 
     return commands_string
+
+
+# Could probably use .join or something
+def sum_strings(strings):
+    summed = ''
+    for string in strings:
+        summed += string
+    return summed
+
+
+#TODO(Alex) Use this for structure and lattice, too
+def commands_to_string(commands: dict) -> str:
+    """
+    Assumes nesting with first key of ordered dictionary defining
+    the outer-most command and last key defining the inner-most command
+    """
+    command_str = ""
+    indent = [' ']
+    for command_key, options in commands.items():
+        assert isinstance(command_key, str), "commands key isn't a string - passing commands incorrectly"
+        assert isinstance(options, dict), "commands value isn't a dictionary - passing commands incorrectly"
+        command_str += sum_strings(indent) + command_key + "(\n"
+        indent.append(' ' * len(command_key + "("))
+        command_str += option_to_string(options, sum_strings(indent))
+
+    # Close command braces
+    if len(commands) == 1:
+        # Use an exception if no nested sub-commands
+        command_str += sum_strings(indent[0:2]) + ") \n"
+    else:
+        for i in range(0, len(commands)):
+            command_str += sum_strings(indent[0:i-1]) + ") \n"
+
+    return command_str
 
 
 def assertions_string(named_result: str, assertions: dict) -> str:
@@ -212,18 +248,24 @@ def assertions_string(named_result: str, assertions: dict) -> str:
 
 
 def xtb_input_string(
-        crystal: dict, settings: dict, named_result: str, assertions=None, comments='') -> str:
+        crystal: dict,
+        settings:     typing.Optional[dict] = None,
+        sub_commands: typing.Optional[dict] = None,
+        named_result: typing.Optional[str] = None,
+        assertions:   typing.Optional[str] = None,
+        comments:     typing.Optional[str] = '') -> str:
 
     structure = get_xtb_periodic_structure_string(crystal)
 
-    other_options = commands_to_string(settings)
+    options = option_to_string(settings) if settings is not None else ''
 
-    if assertions is not None:
-        assertions = assertions_string(named_result, assertions)
-    else:
-        assertions = ''
+    sub_commands = commands_to_string(sub_commands) if sub_commands is not None else ''
+
+    named_result = named_result if named_result is not None else utils.default_named_result
+
+    assertions = assertions_string(named_result, assertions) if assertions is not None else ''
 
     input_string = comments + "\n" + named_result + ' := xtb(\n ' + structure + '\n' + \
-             other_options + '\n)\n' + assertions + '\n\n'
+             options + sub_commands + '\n)\n' + assertions + '\n\n'
 
     return input_string
