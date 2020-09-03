@@ -14,15 +14,19 @@ from src.utils import Set, FileUrl
 # Cubic crystals by bravais lattice
 # Space groups: 195-230.
 
+
 # Any space group beginning with P
 cubic_cifs = {'alpha-N2': FileUrl("cifs/cubic/Simple/alpha-N2/N2_mp-25_primitive.cif",
-                                  "https://materialsproject.org/materials/mp-25/")
+                                  "https://materialsproject.org/materials/mp-25/"),
+              'CH3NH3PbI3': FileUrl("cifs/cubic/Simple/2014_cubic_halides_PBEsol/CH3NH3PbI3.cif",
+                                    "https://github.com/WMD-group/hybrid-perovskites/tree/master/")
               }
 
 # Any space group beginning with I
 bcc_cifs = {'potassium': FileUrl("cifs/cubic/BCC/potassium/K_mp-58_primitive.cif",
-                                 "https://materialsproject.org/materials/mp-58/")
-            }
+                                 "https://materialsproject.org/materials/mp-58/"),
+            'sio2': FileUrl("cifs/cubic/BCC/sio2/SiO2_mp-1188220_primitive.cif",
+                            "https://materialsproject.org/materials/mp-1188220/")}
 
 # Any space group beginning with F
 fcc_cifs = {
