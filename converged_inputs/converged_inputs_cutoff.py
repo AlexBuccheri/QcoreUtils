@@ -12,6 +12,7 @@ from src.run_qcore import run_qcore
 
 
 # Simple cubic
+# Alpha N2, potentially LaAlO3
 
 #TODO(Alex) Converge
 def alpha_N2(named_result='alpha_N2'):
@@ -51,6 +52,7 @@ def alpha_N2(named_result='alpha_N2'):
 
 
 # BCC
+# potassium (a metal), SiO2 zeolite
 
 #TODO(Alex) Need to converge Ewald and MP
 def primitive_potassium(named_result='primitive_potassium'):
@@ -102,17 +104,25 @@ def primitive_potassium(named_result='primitive_potassium'):
 
 
 
+
+
+
+
+
+
 # FCC
 # si, ge, diamond
-# sodium_chloride, magnesium_oxide, pbs
+# sodium_chloride, magnesium_oxide, PbS, CdS
+
+
+
+
 
 # Simple tetragonal
 # rutile
 
 
 # Body-centred tetragonal
-# anatase, MORE?
-
 #TODO(Alex) Need to converge Ewald and MP
 def primitive_anatase(named_result='primitive_anatase'):
     """
@@ -156,6 +166,7 @@ print(primitive_anatase())
 
 
 # hexagonal
+# CdSe, BN, graphite
 
 
 # rhombohedral

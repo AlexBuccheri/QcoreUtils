@@ -2,7 +2,13 @@ from src import qcore_input_strings as qcore_input, utils
 
 
 def xtb_translational_invariance_string(
-        crystal: dict, settings: dict, assertions: dict, shift: float, named_result: str, comments='') -> str:
+        crystal: dict,
+        sub_commands: dict,
+        options: dict,
+        assertions: dict,
+        shift: float,
+        named_result: str,
+        comments='') -> str:
 
     """
     Generate two input strings to test the translational invariance of periodix xTB in qCore.
@@ -11,8 +17,10 @@ def xtb_translational_invariance_string(
     ----------
     crystal : dict
          crystal system: atomic positions (fractional or xyz), species, lattice parameters, space_group and n_atoms
-    settings : dict
-         xTB settings (excluding structure)
+    sub_commands : dict
+         sub-commands excluding structure
+    options : dict
+         xTB options (excluding sub-commands, like structure)
     assertions : dict
          assertions
     shift : float
@@ -39,8 +47,11 @@ def xtb_translational_invariance_string(
     # Original positions
     structure_no_shift = qcore_input.get_xtb_periodic_structure_string(crystal)
 
+    # Sub-commands
+    sub_commands_str = qcore_input.commands_to_string(sub_commands)
+
     # All other options
-    other_options = qcore_input.option_to_string(settings)
+    other_options = qcore_input.option_to_string(options)
 
     # Assertions: Same values but different named results
     assertions_noshift = qcore_input.assertions_string(nr_noshift, assertions)
@@ -53,8 +64,8 @@ def xtb_translational_invariance_string(
     structure_shifted = qcore_input.get_xtb_periodic_structure_string(crystal)
 
     input1 = comments + "\n" + nr_noshift + ' := xtb(\n ' + structure_no_shift + '\n' + \
-             other_options + '\n)\n' + assertions_noshift + '\n\n'
-    input2 = comments + "\n" +  nr_shifted + ' := xtb(\n ' + structure_shifted + '\n' + \
-             other_options + '\n)\n' + assertions_shifted + '\n\n'
+             other_options + sub_commands_str + '\n)\n' + assertions_noshift + '\n\n'
+    input2 = comments + "\n" + nr_shifted + ' := xtb(\n ' + structure_shifted + '\n' + \
+             other_options + sub_commands_str + '\n)\n' + assertions_shifted + '\n\n'
 
     return input1 + input2
