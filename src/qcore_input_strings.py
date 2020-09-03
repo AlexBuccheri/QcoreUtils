@@ -241,9 +241,11 @@ def assertions_string(named_result: str, assertions: dict) -> str:
     """
 
     assert_string = ''
-    for variable_name, variable_value in assertions.items():
+    for variable_name, key in assertions.items():
+        value = str(key.value)
+        margin = str(key.margin)
         assert_string += " assert(load = " + named_result + \
-                         " variable = " + variable_name + " value = " + str(variable_value) + ")\n"
+                         " variable = " + variable_name + " value = " + value + " margin = " + margin + ")\n"
     return assert_string
 
 

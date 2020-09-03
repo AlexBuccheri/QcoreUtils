@@ -38,6 +38,15 @@ class FileUrl():
     #     return
 
 
+class SetAssert:
+    """
+    Container for use with asserts, setting value and
+    corresponding margin of error
+    """
+    def __init__(self, value, margin=''):
+        self.value = value
+        self.margin = margin
+
 
 def angstrom_to_bohr(lattice_parameters: typing.Dict, precision=6) -> typing.Dict:
 
