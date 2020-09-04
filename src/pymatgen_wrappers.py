@@ -114,9 +114,9 @@ def remove_superflous_parameters(lattice_parameters: dict, bravais: str) -> dict
     return required_lattice_parameters
 
 
+
 def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, bravais=None,
                        remove_unused_parameters=True) -> typing.Dict:
-
     """
     Wrapper for pymatgen's cif parser.
 
@@ -184,7 +184,6 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
     # TODO(Alex) need to modify this function to take kargs
     #    lattice_fn = lattices.get_lattice_vectors(bravais, lattice_parameters)
 
-
     # Required for qCore input
     if remove_unused_parameters:
         lattice_parameters = remove_superflous_parameters(lattice_parameters, bravais)
@@ -198,6 +197,43 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
                    'bravais': bravais,
                    'n_atoms': len(species)}
 
+    return crystal_data
 
+
+def structure_parser_wrapper(structure:Structure,
+                             is_primitive_cell=True,
+                             fractional=True,
+                             remove_unused_parameters=True) -> typing.Dict:
+    """
+    Same as above but expects pymatgen.core.structure.Structure object
+
+    """
+
+    if is_primitive_cell:
+        structure = structure.get_primitive_structure()
+
+    if fractional:
+        position_key = 'fractional'
+        positions = structure.frac_coords.tolist()
+    else:
+        position_key = 'xyz'
+        positions = structure.cart_coords.tolist()
+
+    sg = structure.get_space_group_info()
+    bravais = space_groups.space_group_to_bravais(sg[1])
+    lattice_parameters = lattice_parameters_from_cif(structure)
+
+    # Required for qCore input
+    if remove_unused_parameters:
+        lattice_parameters = remove_superflous_parameters(lattice_parameters, bravais)
+    species = [element_enum.value for element_enum in structure.species]
+    assert len(species) == len(positions)
+
+    crystal_data = {position_key: positions,
+                    'species': species,
+                    'lattice_parameters': lattice_parameters,
+                    'space_group': sg,
+                    'bravais': bravais,
+                    'n_atoms': len(species)}
 
     return crystal_data
