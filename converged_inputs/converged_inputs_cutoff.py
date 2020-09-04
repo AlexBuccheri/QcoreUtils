@@ -1,5 +1,41 @@
 """
 Converged inputs using truncated real-space sum in periodic xTB
+
+---------------
+Semiconductors
+---------------
+IV:     Si, Ge, Diamond, alpha-Sn. All FCC. No charge transfer between atoms
+III-V:  Boron nitride (cubic and hex), GaAs, GaP, InAs, InSb
+II-VI:  CdSe (hex), CdS, CdTe, ZnS, ZnSe, ZnTe,
+IV-VI:  PbS (all have comparably small band gaps)
+
+-------------------------
+Wide bandgap/insulators
+-------------------------
+Oxide: TiO2 rutile and anatase, ZnO
+Insulators: NaCl, MgO
+
+Layered: MoS2, Graphite buckled and unbuckled.
+https://pubs.acs.org/doi/10.1021/acs.jpclett.0c00721
+
+---------------
+Metals
+---------------
+Metals should largely get covered via running elemental crystals.
+
+---------------
+Applications
+---------------
+Thin film: Cu2ZnSnS4 (CZTS), Cu2SnS3 (CTS), CdZnTe (CTZ)
+Zeolite: SiO2
+Perovskites: CH3NH3PbI3  Be careful of correlation (DFT+U), SO coupling, etc. May not be viable
+
+-------------------
+Elemental Crystals
+-------------------
+Can run with excessively high cut-offs, then increase them by 50% and show convergence (all automated)
+Will be hard to automatically process/compare the results.
+
 """
 
 import collections
