@@ -13,10 +13,7 @@ Potential type determines how the real-space sum in the 2nd-order xTB potential 
 handled. One can switch between potential_type with the variable at the top of the script.
 
 arbitrary_shifts are given in fractional units [0:1]
-# TODO(Alex) This has a lot of atoms with positions at 1 => MUST ADD WRAPPING TO ENTOS
-# TODO(Alex) Need to set assertion values by running first
 """
-
 
 from collections import OrderedDict
 import enum
@@ -27,6 +24,21 @@ from src.pymatgen_wrappers import cif_parser_wrapper
 from translation_invariance.string_generator import xtb_translational_invariance_string as translation_string
 
 
+def xtb_potential_str(potential_type: enum.Enum) -> str:
+    """
+    Set xTB potential
+    :param potential_type:
+    :return:
+    """
+    if potential_type == PotentialType.TRUNCATED:
+        return 'truncated'
+
+    elif potential_type == PotentialType.Full:
+        return 'full'
+    else:
+        raise Exception("Invalid choice for potential_type: ", potential_type)
+
+
 class PotentialType(enum.Enum):
     TRUNCATED = enum.auto
     FULL = enum.auto
@@ -34,23 +46,6 @@ class PotentialType(enum.Enum):
 
 # Variable used by WHOLE script
 potential_type = PotentialType.TRUNCATED
-
-
-def set_xtb_potential(potential_type: enum.Enum) -> dict:
-    """
-    Set xTB potential
-    :param potential_type:
-    :return:
-    """
-    if potential_type == PotentialType.TRUNCATED:
-        return OrderedDict([
-        ('potential_type', Set('truncated')),
-        ('smoothing_range', Set(1, 'bohr'))
-    ])
-    elif potential_type == PotentialType.Full:
-        return OrderedDict([('potential_type', Set('full'))])
-    else:
-        raise Exception("Invalid choice for potential_type: ", potential_type)
 
 
 def alpha_N2(named_result='alpha_N2') -> str:
@@ -72,21 +67,20 @@ def alpha_N2(named_result='alpha_N2') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
     }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -104,32 +98,30 @@ def malh_perovskite(named_result='malh_perovskite'):
     """
     fname = '../' + cubic.cubic_cifs['CH3NH3PbI3'].file
     crystal = cif_parser_wrapper(fname)
-    # Relaxed structure looks triclinic from lattice parameters
     assert crystal['bravais'] == 'cubic', "crystal not simple cubic"
 
-    #TODO(Alex) Set an arb shift once wrapping of positions can be done
-    arbitrary_shift = 0.0
+    arbitrary_shift = 0.65
 
     options = OrderedDict([
         ('h0_cutoff',               Set(40, 'bohr')),
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type',          Set(xtb_potential_str(potential_type))),
+        ('wraps_atoms',             Set(True))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
     }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -144,30 +136,28 @@ def sio2_zeolite(named_result='SiO2') -> str:
     fname = '../' + cubic.bcc_cifs['sio2'].file
     crystal = cif_parser_wrapper(fname)
     assert crystal['bravais'] == 'bcc', "crystal not simple cubic"
-
-    # TODO(Alex) This has a lot of atoms with positions at 1 => MUST ADD WRAPPING
-    arbitrary_shift = 0.0
+    arbitrary_shift = 0.51
 
     options = OrderedDict([
         ('h0_cutoff',               Set(40, 'bohr')),
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type))),
+        ('wraps_atoms', Set(True))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
     }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -186,22 +176,20 @@ def silicon(named_result='silicon') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
     }
 
-
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -221,14 +209,13 @@ def copper(named_result='copper') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter",  SetAssert(3)),
@@ -238,7 +225,7 @@ def copper(named_result='copper') -> str:
                                               ("energy", SetAssert(0, 0))])
                   }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -257,14 +244,13 @@ def tio2_rutile(named_result='rutile') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(35)),
                                                         ("energy", SetAssert(-150.135037, 1.e-6))]),
@@ -272,7 +258,7 @@ def tio2_rutile(named_result='rutile') -> str:
                                                         ("energy", SetAssert(0, 0))])
                   }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -291,14 +277,13 @@ def tio2_anatase(named_result='anatase') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(11)),
                                                         ("energy", SetAssert(-19.142514, 1.e-6))]),
@@ -306,7 +291,7 @@ def tio2_anatase(named_result='anatase') -> str:
                                                         ("energy", SetAssert(0, 0))])
                   }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -326,14 +311,13 @@ def boron_nitride_hex(named_result='bn_hex') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
                                                         ("energy", SetAssert(0, 0))]),
@@ -341,7 +325,7 @@ def boron_nitride_hex(named_result='bn_hex') -> str:
                                                         ("energy", SetAssert(0, 0))])
                   }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 
@@ -360,14 +344,13 @@ def molybdenum_disulfide(named_result='MoS2') -> str:
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
         ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(2)),
+        ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin'))
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
-
-    sub_commands = OrderedDict([('xtb_potential', set_xtb_potential(potential_type))])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
                                                         ("energy", SetAssert(0, 0))]),
@@ -375,7 +358,7 @@ def molybdenum_disulfide(named_result='MoS2') -> str:
                                                         ("energy", SetAssert(0, 0))])
                   }
 
-    return translation_string(crystal, sub_commands, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
 
 # #

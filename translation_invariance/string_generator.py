@@ -3,11 +3,11 @@ from src import qcore_input_strings as qcore_input, utils
 
 def xtb_translational_invariance_string(
         crystal: dict,
-        sub_commands: dict,
         options: dict,
         assertions: dict,
         shift: float,
         named_result: str,
+        sub_commands=None,
         comments='') -> str:
 
     """
@@ -48,7 +48,7 @@ def xtb_translational_invariance_string(
     structure_no_shift = qcore_input.get_xtb_periodic_structure_string(crystal)
 
     # Sub-commands
-    sub_commands_str = qcore_input.commands_to_string(sub_commands)
+    sub_commands_str = qcore_input.commands_to_string(sub_commands) if sub_commands is not None else ''
 
     # All other options
     other_options = qcore_input.option_to_string(options)
