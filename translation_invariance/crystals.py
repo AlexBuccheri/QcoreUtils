@@ -40,8 +40,8 @@ def xtb_potential_str(potential_type: enum.Enum) -> str:
 
 
 class PotentialType(enum.Enum):
-    TRUNCATED = enum.auto
-    FULL = enum.auto
+    TRUNCATED = 1
+    FULL = 2
 
 
 # Variable used by WHOLE script
@@ -58,8 +58,6 @@ def alpha_N2(named_result='alpha_N2') -> str:
     fname = '../' + cubic.cubic_cifs['alpha-N2'].file
     crystal = cif_parser_wrapper(fname)
     assert crystal['bravais'] == 'cubic', "crystal not simple cubic"
-
-    # Can't do a larger shift as there's no wrapping of atomic positions in entos
     arbitrary_shift = 0.05
 
     options = OrderedDict([
@@ -76,11 +74,13 @@ def alpha_N2(named_result='alpha_N2') -> str:
     ])
 
     assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(2)),
+                                             ("energy", SetAssert(-24.734788141, 1.e-6))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))])
     }
 
-    return translation_string(crystal, options, assertions[potential_type],
+    return translation_string(crystal, options, assertions[PotentialType.TRUNCATED],
                               arbitrary_shift, named_result)
 
 
@@ -88,6 +88,7 @@ def malh_perovskite(named_result='malh_perovskite'):
     """
     Second simple cubic, with several atoms in the central cell.
     #TODO Relaxed structure looks triclinic from lattice parameters
+    # Need to modify alpha to 89.9 but it does converge
 
     Methylammonium lead halides (MALHs)
     chemical formula of CH3NH3PbX3, where X = I, Br or Cl.
@@ -98,7 +99,7 @@ def malh_perovskite(named_result='malh_perovskite'):
     """
     fname = '../' + cubic.cubic_cifs['CH3NH3PbI3'].file
     crystal = cif_parser_wrapper(fname)
-    assert crystal['bravais'] == 'cubic', "crystal not simple cubic"
+    assert crystal['bravais'] == 'monoclinic', "crystal not simple monoclinic"
 
     arbitrary_shift = 0.65
 
@@ -117,13 +118,14 @@ def malh_perovskite(named_result='malh_perovskite'):
     ])
 
     assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))])
     }
 
     return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
-
 
 
 def sio2_zeolite(named_result='SiO2') -> str:
@@ -132,10 +134,12 @@ def sio2_zeolite(named_result='SiO2') -> str:
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
+    #TODO(Alex) Add ('wraps_atoms', Set(True)) to structure command
 
     fname = '../' + cubic.bcc_cifs['sio2'].file
     crystal = cif_parser_wrapper(fname)
     assert crystal['bravais'] == 'bcc', "crystal not simple cubic"
+
     arbitrary_shift = 0.51
 
     options = OrderedDict([
@@ -149,16 +153,18 @@ def sio2_zeolite(named_result='SiO2') -> str:
         ('symmetry_reduction',      Set(True)),
         ('temperature',             Set(0, 'kelvin')),
         ('potential_type', Set(xtb_potential_str(potential_type))),
-        ('wraps_atoms', Set(True))
     ])
 
     assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(16)),
+                                              ("energy", SetAssert(-68.109016142, 1.e-6))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))])
     }
 
     return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
+
 
 
 def silicon(named_result='silicon') -> str:
@@ -185,8 +191,10 @@ def silicon(named_result='silicon') -> str:
     ])
 
     assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)), ("energy", SetAssert(0, 0))])
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(8)),
+                                              ("energy", SetAssert(-3.669583993, 1.e-6))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                              ("energy", SetAssert(0, 0))])
     }
 
     return translation_string(crystal, options, assertions[potential_type],
@@ -219,8 +227,7 @@ def copper(named_result='copper') -> str:
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter",  SetAssert(3)),
-                                              ("energy",  SetAssert(-3.827222, 1.e-6)),
-                                              ("entropy", SetAssert(-0.0001098, 1.e-6))]),
+                                              ("energy",  SetAssert(-3.080165805, 1.e-6))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(3)),
                                               ("energy", SetAssert(0, 0))])
                   }
@@ -249,11 +256,12 @@ def tio2_rutile(named_result='rutile') -> str:
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
         ('temperature',             Set(0, 'kelvin')),
+        ('solver',                  Set('SCC')),
         ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
 
-    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(35)),
-                                                        ("energy", SetAssert(-150.135037, 1.e-6))]),
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(14)),
+                                                        ("energy", SetAssert(-22.337682356, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
@@ -286,8 +294,8 @@ def tio2_anatase(named_result='anatase') -> str:
     ])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(11)),
-                                                        ("energy", SetAssert(-19.142514, 1.e-6))]),
-                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                                        ("energy", SetAssert(-19.256467094, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
 
@@ -319,8 +327,8 @@ def boron_nitride_hex(named_result='bn_hex') -> str:
         ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
 
-    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
-                                                        ("energy", SetAssert(0, 0))]),
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(7)),
+                                                        ("energy", SetAssert(-9.426842352, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
@@ -352,14 +360,16 @@ def molybdenum_disulfide(named_result='MoS2') -> str:
         ('potential_type', Set(xtb_potential_str(potential_type)))
     ])
 
-    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
-                                                        ("energy", SetAssert(0, 0))]),
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(36)),
+                                                        ("energy", SetAssert(-76.45562556, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
                               arbitrary_shift, named_result)
+
+
 
 # #
 # # TODO Add simple orthorhombic
