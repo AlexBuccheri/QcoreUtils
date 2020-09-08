@@ -7,19 +7,22 @@ Better to be explicit
 
 Options are the same in most cases - we're not interested in converged calculations.
 They simply need to be fast, hence default (H,S, rep) cut-offs, small Ewald cut-offs
-and small MP grid density. Some will use SCC or symmetry for faster calculations.
+and small MP grid density. Some will use SCC or symmetry (where possible) for faster
+calculations.
 
 Potential type determines how the real-space sum in the 2nd-order xTB potential is
 handled. One can switch between potential_type with the variable at the top of the script.
 
-arbitrary_shifts are given in fractional units [0:1]
+arbitrary_shifts are given in fractional units and can be anything in principle.
+If A shifted position lies outside of [0:1], then wrap_atoms = true needs to be added
+to the structure command
 """
 
 from collections import OrderedDict
 import enum
 
 from src.utils import Set, SetAssert
-from crystal_system import cubic, tetragonal, hexagonal, trigonal
+from crystal_system import cubic, tetragonal, hexagonal, trigonal, orthorhombic
 from src.pymatgen_wrappers import cif_parser_wrapper
 from translation_invariance.string_generator import xtb_translational_invariance_string as translation_string
 
@@ -84,58 +87,12 @@ def alpha_N2(named_result='alpha_N2') -> str:
                               arbitrary_shift, named_result)
 
 
-def malh_perovskite(named_result='malh_perovskite'):
-    """
-    Second simple cubic, with several atoms in the central cell.
-    #TODO Relaxed structure looks triclinic from lattice parameters
-    # Need to modify alpha to 89.9 but it does converge
-
-    Methylammonium lead halides (MALHs)
-    chemical formula of CH3NH3PbX3, where X = I, Br or Cl.
-    CH3NH3PbI3
-
-    :param named_result: named result string
-    :return: Input for testing translational invariance
-    """
-    fname = '../' + cubic.cubic_cifs['CH3NH3PbI3'].file
-    crystal = cif_parser_wrapper(fname)
-    assert crystal['bravais'] == 'monoclinic', "crystal not simple monoclinic"
-
-    arbitrary_shift = 0.65
-
-    options = OrderedDict([
-        ('h0_cutoff',               Set(40, 'bohr')),
-        ('overlap_cutoff',          Set(40, 'bohr')),
-        ('repulsive_cutoff',        Set(40, 'bohr')),
-        ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(1)),
-        ('ewald_alpha',             Set(0.5)),
-        ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type',          Set(xtb_potential_str(potential_type))),
-        ('wraps_atoms',             Set(True))
-    ])
-
-    assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)),
-                                              ("energy", SetAssert(0, 0))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
-                                              ("energy", SetAssert(0, 0))])
-    }
-
-    return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
-
-
 def sio2_zeolite(named_result='SiO2') -> str:
     """
     BCC structure
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
-    #TODO(Alex) Add ('wraps_atoms', Set(True)) to structure command
-
     fname = '../' + cubic.bcc_cifs['sio2'].file
     crystal = cif_parser_wrapper(fname)
     assert crystal['bravais'] == 'bcc', "crystal not simple cubic"
@@ -370,28 +327,193 @@ def molybdenum_disulfide(named_result='MoS2') -> str:
                               arbitrary_shift, named_result)
 
 
+def gold_cadmium(named_result='CaAu') -> str:
+    """
+    Simple orthorhombic.
 
-# #
-# # TODO Add simple orthorhombic
-#
-# # TODO Find: base-centred C orthorhombic
-#
-# # TODO Find: body-centred orthorhombic
-#
-# # TODO Find: face-centred orthorhombic
-#
-# # TODO Find: simple monoclinic
-#
-# # TODO Find: base-centred C monoclinic
-#
-#
-# def produce_translation_test(crystal_inputs):
-#     total_input = ''
-#     for input in crystal_inputs:
-#         total_input += input() + '\n'
-#     return total_input
-#
-#
-# all_tests = [silicon, copper, tio2_rutile, tio2_anatase, boron_nitride_hex, molybdenum_disulfide_rhom]
-# print(produce_translation_test([silicon]))
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + orthorhombic.simple_orthorhombic_cifs['gold_cadmium'].file
+    crystal = cif_parser_wrapper(fname)
+    arbitrary_shift = 0.18
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('symmetry_reduction',      Set(False)),
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
+    ])
+
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 0))])
+                  }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result)
+
+
+def copper_oxyfluoride(named_result='CuO2F') -> str:
+    """
+    Body-centred orthorhombic.
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + orthorhombic.body_centred_orthorhombic_cifs['copper_oxyfluoride'].file
+    crystal = cif_parser_wrapper(fname)
+    # Will require wrap_atoms
+    arbitrary_shift = 0.38
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('symmetry_reduction',      Set(False)),
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
+    ])
+
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 0))])
+                  }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result)
+
+
+def aluminium_titanate(named_result='TiAl2O5') -> str:
+    """
+    Base-centred C orthorhombic.
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + orthorhombic.base_centred_orthorhombic_cifs['aluminium_titanate'].file
+    crystal = cif_parser_wrapper(fname)
+    # Will require wrap_atoms
+    arbitrary_shift = 0.38
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('symmetry_reduction',      Set(False)),
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
+    ])
+
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 0))])
+                  }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result)
+
+
+def titanium_disilicide(named_result='TiSi2') -> str:
+    """
+    Face-centred orthorhombic.
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + orthorhombic.face_centred_orthorhombic_cifs['titanium_disilicide'].file
+    crystal = cif_parser_wrapper(fname)
+    # Will require wrap_atoms
+    arbitrary_shift = 0.38
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('symmetry_reduction',      Set(False)),
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type', Set(xtb_potential_str(potential_type)))
+    ])
+
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 0))])
+                  }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result)
+
+
+# TODO Find: simple monoclinic
+
+# TODO Find: base-centred C monoclinic
+
+def malh_perovskite(named_result='malh_perovskite'):
+    """
+    Second simple cubic, with several atoms in the central cell.
+    # TODO Relaxed structure looks triclinic from lattice parameters
+    # Space group suggests monoclinic
+    # Need to modify alpha angle to 89.9 degrees but it does converge for truncated potential
+
+    Methylammonium lead halides (MALHs)
+    chemical formula of CH3NH3PbX3, where X = I, Br or Cl.
+    CH3NH3PbI3
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + cubic.cubic_cifs['CH3NH3PbI3'].file
+    crystal = cif_parser_wrapper(fname)
+    assert crystal['bravais'] == 'monoclinic', "crystal not simple monoclinic"
+
+    arbitrary_shift = 0.65
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('symmetry_reduction',      Set(True)),
+        ('temperature',             Set(0, 'kelvin')),
+        ('potential_type',          Set(xtb_potential_str(potential_type))),
+        ('wraps_atoms',             Set(True))
+    ])
+
+    assertions = {
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))])
+    }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result)
+
+# TODO Add Triclinic
+
 
