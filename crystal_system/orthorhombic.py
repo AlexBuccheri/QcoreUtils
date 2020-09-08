@@ -8,23 +8,29 @@
   calcium titanate, and aluminum hexathiohypodiphosphate details are tabulated.
 """
 
-from src.utils import Set
+from src.utils import Set, FileUrl
 
 # Orthorhombic crystals by bravais lattice
 # Space groups: 16 - 74
 
 # Any space group beginning with P
-simple_orthorhombic_cifs = {}
+simple_orthorhombic_cifs = {'gold_cadmium': FileUrl("cifs/orthorhombic/Simple/CdAu/CdAu_mp-1404_primitive.cif",
+                                                    "https://materialsproject.org/materials/mp-1404")
+                            }
 
 # Any space group beginning with C
 # Need in C-configuration to be consistent with qCore lattice vectors
 # and tabulated k-points
-base_centred_orthorhombic_cifs = {}
+base_centred_orthorhombic_cifs = {'aluminium_titanate': FileUrl("cifs/orthorhombic/base_centred_C/TiAl2O5_mp-4930_primitive.cif",
+                                                                "https://materialsproject.org/materials/mp-4930")}
 
 # Any space group beginning with I
-body_centred_orthorhombic_cifs = {}
+body_centred_orthorhombic_cifs = {'copper_oxyfluoride': FileUrl("cifs/orthorhombic/body_centred/CuO2F_mp-997107_primitive.cif",
+                                                                "https://materialsproject.org/materials/mp-997107")
+                                  }
 
-face_centred_orthorhombic_cifs = {}
+face_centred_orthorhombic_cifs = {'titanium_disilicide': FileUrl("cifs/orthorhombic/face_centred/TiSi2_mp-2582_primitive.cif",
+                                                                 "https://materialsproject.org/materials/mp-2582")}
 
 
 # Crystals without cif files
