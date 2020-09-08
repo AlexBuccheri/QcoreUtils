@@ -125,7 +125,8 @@ def structure_string(*args: str):
     return structure_string
 
 
-def get_xtb_periodic_structure_string(crystal: dict) -> str:
+def get_xtb_periodic_structure_string(crystal: dict,
+                                      options=None) -> str:
 
     """
     For a periodic crystal, create atoms and lattice strings, fill
@@ -135,6 +136,8 @@ def get_xtb_periodic_structure_string(crystal: dict) -> str:
     ----------
     crystal : dict
        Crystal data
+    options : Optional, dict
+       Options for structure command
 
     Returns
     -------
@@ -149,7 +152,11 @@ def get_xtb_periodic_structure_string(crystal: dict) -> str:
         lattice_str = lattice_string(crystal['lattice_parameters'], bravais=crystal['bravais'])
     else:
         lattice_str = lattice_string(crystal['lattice_parameters'], space_group=crystal['space_group'])
-    return structure_string(atoms_str, lattice_str)
+    if options is None:
+        return structure_string(atoms_str, lattice_str)
+    else:
+        options_str = option_to_string(options)
+        return structure_string(atoms_str, lattice_str, options_str)
 
 
 def option_to_string(options: dict, indent=1) -> str:
