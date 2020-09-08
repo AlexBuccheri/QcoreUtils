@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from src import qcore_input_strings as qcore_input, utils
 
 
@@ -60,8 +62,11 @@ def xtb_translational_invariance_string(
     # Shifted positions
     crystal = utils.update_positions(crystal, shift)
     all_positions_in_cell = utils.check_fractional_positions(named_result, crystal['fractional'])
-    #assert all_positions_in_cell
-    structure_shifted = qcore_input.get_xtb_periodic_structure_string(crystal)
+    if all_positions_in_cell:
+        structure_shifted = qcore_input.get_xtb_periodic_structure_string(crystal)
+    else:
+        structure_options = OrderedDict([ ('wraps_atoms', utils.Set(True)) ])
+        structure_shifted = qcore_input.get_xtb_periodic_structure_string(crystal, structure_options)
 
     input1 = comments + "\n" + nr_noshift + ' := xtb(\n ' + structure_no_shift + '\n' + \
              other_options + sub_commands_str + '\n)\n' + assertions_noshift + '\n\n'
