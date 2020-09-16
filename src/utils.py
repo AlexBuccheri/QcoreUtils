@@ -202,10 +202,10 @@ def check_fractional_positions(named_result: str, positions: typing.List) -> boo
         below_zero = np.where((xyz < 0))[0]
         exceed_one = np.where((xyz > 1))[0]
         if len(below_zero) > 0:
-            print("Component/s of atom position " + str(i) + " of " + named_result + " below 0: " + str(xyz))
+            print("Component/s of atom position " + str(i) + " of " + named_result + " below 0: " + str(xyz), file=sys.stderr)
             all_positions_in_cell = False
         elif len(exceed_one) > 0:
-            print("Component/s of atom position " + str(i) + " of " + named_result + " exceed 1: " + str(xyz))
+            print("Component/s of atom position " + str(i) + " of " + named_result + " exceed 1: " + str(xyz), file=sys.stderr)
             all_positions_in_cell = False
 
     return all_positions_in_cell
@@ -292,8 +292,8 @@ def update_positions(crystal: dict, shift: float):
 
     position_key = get_positions_key(crystal)
     if position_key == 'fractional' and abs(shift) > 1:
-        warnings.warn("magnitude of position shift exceeds 1 whilst "
-                      "using fractional coordinates: ", shift)
+        warnings.warn("magnitude of position shift exceeds |1| whilst "
+                      "using fractional coordinates")
 
     new_positions = []
     for position in crystal[position_key]:

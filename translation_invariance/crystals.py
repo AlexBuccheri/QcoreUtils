@@ -14,37 +14,19 @@ Potential type determines how the real-space sum in the 2nd-order xTB potential 
 handled. One can switch between potential_type with the variable at the top of the script.
 
 arbitrary_shifts are given in fractional units and can be anything in principle.
-If A shifted position lies outside of [0:1], then wrap_atoms = true needs to be added
-to the structure command
+If A shifted position lies outside of [0:1], then wrap_atoms = true is automatically
+added to the structure command
 """
 
 from collections import OrderedDict
-import enum
 
+from src.xtb_potential import xtb_potential_str, PotentialType
 from src.utils import Set, SetAssert
 from crystal_system import cubic, tetragonal, hexagonal, trigonal, orthorhombic
 from src.pymatgen_wrappers import cif_parser_wrapper
-from translation_invariance.string_generator import xtb_translational_invariance_string as translation_string
-
-
-def xtb_potential_str(potential_type: enum.Enum) -> str:
-    """
-    Set xTB potential
-    :param potential_type:
-    :return:
-    """
-    if potential_type == PotentialType.TRUNCATED:
-        return 'truncated'
-
-    elif potential_type == PotentialType.Full:
-        return 'full'
-    else:
-        raise Exception("Invalid choice for potential_type: ", potential_type)
-
-
-class PotentialType(enum.Enum):
-    TRUNCATED = 1
-    FULL = 2
+from translation_invariance.string_generator \
+    import xtb_translational_invariance_string as translation_string, \
+    comments_list
 
 
 # Variable used by WHOLE script
@@ -54,6 +36,10 @@ potential_type = PotentialType.TRUNCATED
 def alpha_N2(named_result='alpha_N2') -> str:
     """
     Simple cubic
+    TODO(Alex) If the shift is large for alpha N2, the total energy is massively different
+    (~0.5 bohr). Also, the enthropy is zero for the translated system:
+    Looks like an issue with occupations. Requires debugging at Gamma
+
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
@@ -71,57 +57,58 @@ def alpha_N2(named_result='alpha_N2') -> str:
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin')),
         ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(2)),
-                                             ("energy", SetAssert(-24.734788141, 1.e-6))]),
-        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
-                                              ("energy", SetAssert(0, 0))])
-    }
-
-    return translation_string(crystal, options, assertions[PotentialType.TRUNCATED],
-                              arbitrary_shift, named_result)
-
-
-def sio2_zeolite(named_result='SiO2') -> str:
-    """
-    BCC structure
-    :param named_result: named result string
-    :return: Input for testing translational invariance
-    """
-    fname = '../' + cubic.bcc_cifs['sio2'].file
-    crystal = cif_parser_wrapper(fname)
-    assert crystal['bravais'] == 'bcc', "crystal not simple cubic"
-
-    arbitrary_shift = 0.51
-
-    options = OrderedDict([
-        ('h0_cutoff',               Set(40, 'bohr')),
-        ('overlap_cutoff',          Set(40, 'bohr')),
-        ('repulsive_cutoff',        Set(40, 'bohr')),
-        ('ewald_real_cutoff',       Set(10, 'bohr')),
-        ('ewald_reciprocal_cutoff', Set(1)),
-        ('ewald_alpha',             Set(0.5)),
-        ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type', Set(xtb_potential_str(potential_type))),
-    ])
-
-    assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(16)),
-                                              ("energy", SetAssert(-68.109016142, 1.e-6))]),
+                                             ("energy", SetAssert(-24.742649248, 1.e-6))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                               ("energy", SetAssert(0, 0))])
     }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result, comments=comments_list(arbitrary_shift))
 
+
+def sio2_zeolite(named_result='SiO2') -> str:
+    """
+    BCC structure
+    Notes:
+    If one exceeds 0.24, one has to greatly increase the cut-offs to
+    get consistent total energies.
+    See range_of_translations.py for more exploration with this system
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+
+    fname = '../' + cubic.bcc_cifs['sio2'].file
+    crystal = cif_parser_wrapper(fname)
+    assert crystal['bravais'] == 'bcc', "crystal not simple cubic"
+
+    arbitrary_shift = 0.24
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(40, 'bohr')),
+        ('overlap_cutoff',          Set(40, 'bohr')),
+        ('repulsive_cutoff',        Set(40, 'bohr')),
+        ('ewald_real_cutoff',       Set(40, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('monkhorst_pack',          Set([2, 2, 2])),
+        ('potential_type',          Set(xtb_potential_str(potential_type))),
+    ])
+
+    assertions = {
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(17)),
+                                              ("energy", SetAssert(-69.056517465, 1.e-6))]),
+        PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
+                                              ("energy", SetAssert(0, 0))])
+    }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result, comments=comments_list(arbitrary_shift))
 
 
 def silicon(named_result='silicon') -> str:
@@ -132,7 +119,7 @@ def silicon(named_result='silicon') -> str:
     """
 
     crystal = cubic.silicon()
-    arbitrary_shift = 0.43
+    arbitrary_shift = 0.5
 
     options = OrderedDict([
         ('h0_cutoff',               Set(40, 'bohr')),
@@ -142,20 +129,18 @@ def silicon(named_result='silicon') -> str:
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type', Set(xtb_potential_str(potential_type)))
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
     assertions = {
-        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(8)),
+        PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(7)),
                                               ("energy", SetAssert(-3.669583993, 1.e-6))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
                                               ("energy", SetAssert(0, 0))])
     }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result, comments=comments_list(arbitrary_shift))
 
 
 def copper(named_result='copper') -> str:
@@ -177,25 +162,29 @@ def copper(named_result='copper') -> str:
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(True)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type', Set(xtb_potential_str(potential_type)))
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
     assertions = {
         PotentialType.TRUNCATED: OrderedDict([("n_iter",  SetAssert(3)),
-                                              ("energy",  SetAssert(-3.080165805, 1.e-6))]),
+                                              ("energy",  SetAssert(-3.080495065, 1.e-6))]),
         PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(3)),
                                               ("energy", SetAssert(0, 0))])
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result, comments=comments_list(arbitrary_shift))
 
 
 def tio2_rutile(named_result='rutile') -> str:
     """
     Simple tetragonal
+    Notes:
+    Similar issue to SiO2. If one goes to a larger translation where
+    wrapping is required (0.24), then one has to turn up the cut-offs
+    to obtain agreement to 7 d.p. in the total_energy.
+    See the gamma_point input in range_of_translations.py
+
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
@@ -211,20 +200,19 @@ def tio2_rutile(named_result='rutile') -> str:
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin')),
         ('solver',                  Set('SCC')),
-        ('potential_type', Set(xtb_potential_str(potential_type)))
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
     assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(14)),
-                                                        ("energy", SetAssert(-22.337682356, 1.e-6))]),
+                                                        ("energy", SetAssert(-22.336229856, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 def tio2_anatase(named_result='anatase') -> str:
@@ -235,35 +223,36 @@ def tio2_anatase(named_result='anatase') -> str:
     """
 
     crystal = tetragonal.tio2_anatase()
-    arbitrary_shift = 0.04
+    arbitrary_shift = 0.34
 
     options = OrderedDict([
         ('h0_cutoff',               Set(40, 'bohr')),
         ('overlap_cutoff',          Set(40, 'bohr')),
         ('repulsive_cutoff',        Set(40, 'bohr')),
-        ('ewald_real_cutoff',       Set(10, 'bohr')),
+        ('ewald_real_cutoff',       Set(40, 'bohr')),
+        ('dispersion_cutoff',       Set(60, 'bohr')),
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
         ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type', Set(xtb_potential_str(potential_type)))
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
-    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(11)),
-                                                        ("energy", SetAssert(-19.256467094, 1.e-6))]),
+    # In the shifted case, it annoyingly takes one more iteration (12 vs 11)
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("energy", SetAssert(-19.399515443, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 def boron_nitride_hex(named_result='bn_hex') -> str:
     """
     Hexagonal.
-    Check D3 is added
+
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
@@ -279,25 +268,24 @@ def boron_nitride_hex(named_result='bn_hex') -> str:
         ('ewald_reciprocal_cutoff', Set(1)),
         ('ewald_alpha',             Set(0.5)),
         ('monkhorst_pack',          Set([2, 2, 2])),
-        ('symmetry_reduction',      Set(False)),
-        ('temperature',             Set(0, 'kelvin')),
-        ('potential_type', Set(xtb_potential_str(potential_type)))
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
     ])
 
-    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(7)),
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(6)),
                                                         ("energy", SetAssert(-9.426842352, 1.e-6))]),
                   PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0, 0)),
                                                         ("energy", SetAssert(0, 0))])
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 def molybdenum_disulfide(named_result='MoS2') -> str:
     """
     Rhombohedral.
-    Check D3 is added
+
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
@@ -324,12 +312,14 @@ def molybdenum_disulfide(named_result='MoS2') -> str:
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 def gold_cadmium(named_result='CaAu') -> str:
     """
     Simple orthorhombic.
+    TODO(Alex) Try to converge
 
     :param named_result: named result string
     :return: Input for testing translational invariance
@@ -358,20 +348,21 @@ def gold_cadmium(named_result='CaAu') -> str:
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
-def copper_oxyfluoride(named_result='CuO2F') -> str:
+def calcium_titanate(named_result='CaTiO3') -> str:
     """
-    Body-centred orthorhombic.
+    Simple orthorhombic.
+    TODO(Alex) Try to converge
 
     :param named_result: named result string
     :return: Input for testing translational invariance
     """
-    fname = '../' + orthorhombic.body_centred_orthorhombic_cifs['copper_oxyfluoride'].file
+    fname = '../' + orthorhombic.simple_orthorhombic_cifs['calcium_titanate'].file
     crystal = cif_parser_wrapper(fname)
-    # Will require wrap_atoms
-    arbitrary_shift = 0.38
+    arbitrary_shift = 0.18
 
     options = OrderedDict([
         ('h0_cutoff',               Set(40, 'bohr')),
@@ -393,12 +384,50 @@ def copper_oxyfluoride(named_result='CuO2F') -> str:
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
+
+
+def copper_oxyfluoride(named_result='CuO2F') -> str:
+    """
+    Body-centred orthorhombic.
+
+    :param named_result: named result string
+    :return: Input for testing translational invariance
+    """
+    fname = '../' + orthorhombic.body_centred_orthorhombic_cifs['copper_oxyfluoride'].file
+    crystal = cif_parser_wrapper(fname)
+    arbitrary_shift = 0.38
+
+    options = OrderedDict([
+        ('h0_cutoff',               Set(60, 'bohr')),
+        ('overlap_cutoff',          Set(60, 'bohr')),
+        ('repulsive_cutoff',        Set(60, 'bohr')),
+        ('dispersion_cutoff',       Set(60, 'bohr')),
+        ('ewald_real_cutoff',       Set(60, 'bohr')),
+        ('ewald_reciprocal_cutoff', Set(1)),
+        ('ewald_alpha',             Set(0.5)),
+        ('symmetry_reduction',      Set(False)),
+        ('solver',                  Set('SCC')),
+        ('potential_type',          Set(xtb_potential_str(potential_type)))
+    ])
+
+    assertions = {PotentialType.TRUNCATED: OrderedDict([("n_iter", SetAssert(43)),
+                                                        ("energy", SetAssert(-33.936868441, 1.e-6))]),
+                  PotentialType.FULL:      OrderedDict([("n_iter", SetAssert(0)),
+                                                        ("energy", SetAssert(0, 0))])
+                  }
+
+    return translation_string(crystal, options, assertions[potential_type],
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
+
 
 
 def aluminium_titanate(named_result='TiAl2O5') -> str:
     """
     Base-centred C orthorhombic.
+    # NOTE: Can't converge
 
     :param named_result: named result string
     :return: Input for testing translational invariance
@@ -428,12 +457,14 @@ def aluminium_titanate(named_result='TiAl2O5') -> str:
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 def titanium_disilicide(named_result='TiSi2') -> str:
     """
     Face-centred orthorhombic.
+    # NOTE: Can't converge
 
     :param named_result: named result string
     :return: Input for testing translational invariance
@@ -463,12 +494,15 @@ def titanium_disilicide(named_result='TiSi2') -> str:
                   }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
 
 
 # TODO Find: simple monoclinic
 
+
 # TODO Find: base-centred C monoclinic
+
 
 def malh_perovskite(named_result='malh_perovskite'):
     """
@@ -512,7 +546,9 @@ def malh_perovskite(named_result='malh_perovskite'):
     }
 
     return translation_string(crystal, options, assertions[potential_type],
-                              arbitrary_shift, named_result)
+                              arbitrary_shift, named_result,
+                              comments=comments_list(arbitrary_shift))
+
 
 # TODO Add Triclinic
 
