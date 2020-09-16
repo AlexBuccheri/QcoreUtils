@@ -15,7 +15,9 @@ from src.utils import Set, FileUrl
 
 # Any space group beginning with P
 simple_orthorhombic_cifs = {'gold_cadmium': FileUrl("cifs/orthorhombic/Simple/CdAu/CdAu_mp-1404_primitive.cif",
-                                                    "https://materialsproject.org/materials/mp-1404")
+                                                    "https://materialsproject.org/materials/mp-1404"),
+                            'calcium_titanate': FileUrl("cifs/orthorhombic/Simple/CaTiO3/CaTiO3_mp-4019_primitive.cif"
+                                                        "")
                             }
 
 # Any space group beginning with C

@@ -26,7 +26,10 @@ cubic_cifs = {'alpha-N2': FileUrl("cifs/cubic/Simple/alpha-N2/N2_mp-25_primitive
 bcc_cifs = {'potassium': FileUrl("cifs/cubic/BCC/potassium/K_mp-58_primitive.cif",
                                  "https://materialsproject.org/materials/mp-58/"),
             'sio2': FileUrl("cifs/cubic/BCC/sio2/SiO2_mp-1188220_primitive.cif",
-                            "https://materialsproject.org/materials/mp-1188220/")}
+                            "https://materialsproject.org/materials/mp-1188220/"),
+
+            'nickel_triphosphide': FileUrl("cifs/cubic/BCC/nickel_triphosphide/NiP3_mp-2301_primitive.cif",
+                        "https://materialsproject.org/materials/mp-2301")}
 
 # Any space group beginning with F
 fcc_cifs = {
@@ -81,6 +84,7 @@ def silicon():
             'species': species,
             'lattice_parameters': lattice_parameters,
             'space_group': ('', space_group),
+            'bravais': bravais,
             'n_atoms': 2}
 
     return data

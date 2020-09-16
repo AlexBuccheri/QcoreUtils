@@ -45,6 +45,7 @@ def boron_nitride():
             'species':species,
             'lattice_parameters':lattice_parameters,
             'space_group': ('', space_group),
+            'bravais': bravais,
             'n_atoms': 4}
     return data
 
