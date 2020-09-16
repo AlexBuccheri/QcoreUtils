@@ -202,6 +202,7 @@ def sum_strings(strings):
 
 
 #TODO(Alex) Use this for structure and lattice, too
+# Would make more sense to nest in the dict like one does with the commands
 def commands_to_string(commands: dict) -> str:
     """
     Assumes nesting with first key of ordered dictionary defining
@@ -246,7 +247,6 @@ def assertions_string(named_result: str, assertions: dict) -> str:
        assert(load = named_result variable = variable_name value = variable_value)
 
     """
-
     assert_string = ''
     for variable_name, key in assertions.items():
         value = str(key.value)
@@ -282,3 +282,35 @@ def xtb_input_string(
              options + sub_commands + '\n)\n' + assertions + '\n\n'
 
     return input_string
+
+
+def xtb_input_string_cleaner(
+        crystal:      typing.Optional[dict]=None,
+        sub_commands: typing.Optional[dict]=None,
+        options:      typing.Optional[dict]=None,
+        assertions:   typing.Optional[dict]=None,
+        named_result: typing.Optional[str]=None,
+        comments='') -> str:
+    assert crystal is not None or sub_commands is not None, \
+        "Expect either crystal or sub_commands containing structure "
+
+    if sub_commands:
+        quit("Need to implement proper treatment of sub-commands")
+
+    crystal['lattice_parameters'] = utils.angstrom_to_bohr(crystal['lattice_parameters'])
+
+    structure_str = get_xtb_periodic_structure_string(crystal)
+
+    options_str = option_to_string(options) if options is not None else ''
+
+    sub_commands = commands_to_string(sub_commands) if sub_commands is not None else ''
+
+    assertions_str = assertions_string(named_result, assertions) \
+        if assertions is not None else ''
+
+    named_result = named_result if named_result is not None else utils.default_named_result
+
+    input = comments + "\n" + named_result + ' := xtb(\n ' + structure_str + '\n' + \
+            options_str + '\n)\n' + assertions_str + '\n\n'
+
+    return input
