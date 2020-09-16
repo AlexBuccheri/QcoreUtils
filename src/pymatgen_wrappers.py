@@ -116,7 +116,7 @@ def remove_superflous_parameters(lattice_parameters: dict, bravais: str) -> dict
 
 
 def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, bravais=None,
-                       remove_unused_parameters=True) -> typing.Dict:
+                       remove_unused_parameters=True, supercell_coefficients=None) -> typing.Dict:
     """
     Wrapper for pymatgen's cif parser.
 
@@ -140,6 +140,9 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
        bravais lattice type. Required if unit cell is not primitive
     remove_unused_parameters : bool, optional
        Remove lattice parameters that are not required in the Qcore input
+    supercell_coefficients : list of 3 integers, optional
+       Integers to expand cell to supercell
+       See structure.make_supercell() in https://pymatgen.org/usage.html
 
     Returns
     -------
@@ -164,6 +167,10 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
 
     parser = pymatgen.io.cif.CifParser(fname)
     structure = parser.get_structures(primitive=is_primitive_cell)[0]
+
+    if supercell_coefficients:
+        assert len(supercell_coefficients) == 3, "supercell_coefficients should have length 3"
+        structure.make_supercell(supercell_coefficients)
 
     if fractional:
         position_key = 'fractional'
@@ -237,3 +244,5 @@ def structure_parser_wrapper(structure:Structure,
                     'n_atoms': len(species)}
 
     return crystal_data
+
+
