@@ -116,7 +116,8 @@ def remove_superflous_parameters(lattice_parameters: dict, bravais: str) -> dict
 
 
 def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, bravais=None,
-                       remove_unused_parameters=True, supercell_coefficients=None) -> typing.Dict:
+                       remove_unused_parameters=True, supercell_coefficients=None,
+                       lattice_vectors=None) -> typing.Dict:
     """
     Wrapper for pymatgen's cif parser.
 
@@ -203,6 +204,9 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
                    'space_group': sg,
                    'bravais': bravais,
                    'n_atoms': len(species)}
+
+    if lattice_vectors is not None:
+        crystal_data['lattice_vectors'] = lattice_vectors
 
     return crystal_data
 

@@ -1,5 +1,6 @@
 import typing
 import numpy as np
+import math
 import collections
 import sys
 import warnings
@@ -235,7 +236,6 @@ def get_positions_key(crystal: dict):
 
     return 'fractional' if 'fractional' in crystal.keys() else "xyz"
 
-
 def substitute_positions_and_species(input_string: str, crystal: dict, position_key: str) -> str:
 
     """
@@ -302,3 +302,52 @@ def update_positions(crystal: dict, shift: float):
 
     return crystal
 
+def rotate_lattice_vector(crystal: dict, phi_z: float, phi_x: float, phi_y: float):
+
+    """
+    Applies a sequential rotation to the lattice vectors of a crystal.
+
+
+    Parameters
+    ----------
+    crystal : dict
+       Crystal data
+    phi_z : float
+       Perform rotation around the z axis
+    phi_x : float
+       Perform rotation around the x axis
+    phi_y : float
+       Perform rotation around the y axis
+
+    Returns
+    -------
+        crystal dictionary with updated atomic positions
+    """
+
+    # switch from row-wise storage of vectors to column-wise
+    new_positions = np.transpose(crystal["lattice_vectors"])
+
+    # Rotate around z axis
+    new_positions = np.dot(
+                        np.array([[math.cos(phi_z), -math.sin(phi_z), 0],
+                                  [math.sin(phi_z),  math.cos(phi_z), 0],
+                                  [              0,                0, 1]]),
+                        new_positions)
+
+    # Rotate around x axis
+    new_positions = np.dot(
+                        np.array([[              1,                0,                0],
+                                  [              0,  math.cos(phi_x), -math.sin(phi_x)],
+                                  [              0,  math.sin(phi_x),  math.cos(phi_x)]]),
+                        new_positions)
+
+    #Rotate around y axis
+    new_positions = np.dot(
+                        np.array([[math.cos(phi_y),                0, -math.sin(phi_y)],
+                                  [              0,                1,                0],
+                                  [math.sin(phi_y),                0, math.cos(phi_y)]]),
+                        new_positions)
+
+    crystal["lattice_vectors"] = new_positions
+
+    return crystal
