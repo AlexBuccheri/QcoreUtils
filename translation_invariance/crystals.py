@@ -77,7 +77,7 @@ def sio2_zeolite(named_result='SiO2') -> str:
     Notes:
     If one exceeds 0.24, one has to greatly increase the cut-offs to
     get consistent total energies.
-    See range_of_translations.py for more exploration with this system
+    See range_of_rotations.py for more exploration with this system
 
     :param named_result: named result string
     :return: Input for testing translational invariance
@@ -183,7 +183,7 @@ def tio2_rutile(named_result='rutile') -> str:
     Similar issue to SiO2. If one goes to a larger translation where
     wrapping is required (0.24), then one has to turn up the cut-offs
     to obtain agreement to 7 d.p. in the total_energy.
-    See the gamma_point input in range_of_translations.py
+    See the gamma_point input in range_of_rotations.py
 
     :param named_result: named result string
     :return: Input for testing translational invariance

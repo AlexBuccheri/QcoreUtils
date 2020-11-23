@@ -47,7 +47,7 @@ def atoms_string(n_atoms: int, position_key: str) -> str:
     return atoms_string
 
 
-def lattice_string(lattice_parameters: typing.Dict, bravais=None, space_group=None, precision=5) -> str:
+def lattice_string(lattice_parameters: typing.Dict, bravais=None, space_group=None, lattice_vectors=None, precision=5) -> str:
 
     """
     Generate qcore lattice input string
@@ -61,6 +61,8 @@ def lattice_string(lattice_parameters: typing.Dict, bravais=None, space_group=No
         bravais lattice type (14 bravais lattice types)
      space_group : int, optional
         Space group number, 1-230. Bravais lattice information contained in space group
+     lattice_vectors : np.array, optional
+        3x3 matrix of lattice vectors that should be stored row-wise
     precision : int, default = 5
         How many decimal places to round lattice constants/angles to
 
@@ -91,10 +93,15 @@ def lattice_string(lattice_parameters: typing.Dict, bravais=None, space_group=No
         value = str(round(rhs.value, precision))
         lattice_string += indent + key + " = " + value + " " + rhs.unit + "\n"
 
-    lattice_string += indent + "bravais = " + bravais + "\n" + indent[:-1] + ")\n"
+    lattice_string += indent + "bravais = " + bravais + "\n"
+
+    if lattice_vectors is not None:
+        lattice_string += indent + "lattice_vectors = [" + str(list(lattice_vectors[0])) + "," + "\n"
+        lattice_string += indent + " " * 19 + str(list(lattice_vectors[1])) + "," + "\n"
+        lattice_string += indent + " " * 19 + str(list(lattice_vectors[2])) + "]" + "\n"
+        lattice_string += indent[:-1] + ")\n"
 
     return lattice_string
-
 
 def structure_string(*args: str):
 
@@ -148,10 +155,14 @@ def get_xtb_periodic_structure_string(crystal: dict,
     position_key = utils.get_positions_key(crystal)
     empty_atoms_str = atoms_string(crystal['n_atoms'], position_key=position_key)
     atoms_str = utils.substitute_positions_and_species(empty_atoms_str, crystal, position_key=position_key)
-    if 'bravais' in crystal:
-        lattice_str = lattice_string(crystal['lattice_parameters'], bravais=crystal['bravais'])
+    if 'lattice_vectors' in crystal:
+        lattice_vectors = crystal['lattice_vectors']
     else:
-        lattice_str = lattice_string(crystal['lattice_parameters'], space_group=crystal['space_group'])
+        lattice_vectors = None
+    if 'bravais' in crystal:
+        lattice_str = lattice_string(crystal['lattice_parameters'], bravais=crystal['bravais'], lattice_vectors=lattice_vectors)
+    else:
+        lattice_str = lattice_string(crystal['lattice_parameters'], space_group=crystal['space_group'], lattice_vectors=lattice_vectors)
     if options is None:
         return structure_string(atoms_str, lattice_str)
     else:

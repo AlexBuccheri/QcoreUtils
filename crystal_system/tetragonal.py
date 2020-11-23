@@ -24,7 +24,7 @@ body_centred_tetragonal_cifs = {}
 # Avoid additional tabulating and use cif_parser_wrapper to generate
 # these dictionaries.
 
-def tio2_rutile() -> dict:
+def tio2_rutile(lattice_vectors=None) -> dict:
 
     """
     TiO2 Rutile.
@@ -50,6 +50,8 @@ def tio2_rutile() -> dict:
             'space_group': ('', space_group),
             'n_atoms': len(species)}
 
+    if lattice_vectors is not None:
+        data['lattice_vectors'] = lattice_vectors
     return data
 
 

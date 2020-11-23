@@ -206,7 +206,14 @@ def cif_parser_wrapper(fname:str, is_primitive_cell=True, fractional=True, brava
                    'n_atoms': len(species)}
 
     if lattice_vectors is not None:
-        crystal_data['lattice_vectors'] = lattice_vectors
+
+        crystal_data = {position_key: positions,
+                        'species': species,
+                        'lattice_parameters': lattice_parameters,
+                        'space_group': sg,
+                        'bravais': bravais,
+                        'n_atoms': len(species),
+                        'lattice_vectors': lattice_vectors}
 
     return crystal_data
 
