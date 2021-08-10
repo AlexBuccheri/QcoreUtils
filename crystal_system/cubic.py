@@ -46,7 +46,9 @@ fcc_cifs = {
             'magnesium_oxide': FileUrl("cifs/cubic/FCC/MgO/MgO_mp-1265_primitive.cif",
                                        "https://materialsproject.org/materials/mp-1265/"),
             'lithium_hydride': FileUrl("cifs/cubic/FCC/LiH/LiH_mp-23703_primitive.cif",
-                                       "https://materialsproject.org/materials/mp-23703/")
+                                       "https://materialsproject.org/materials/mp-23703/"),
+            'silicon': FileUrl("cifs/cubic/FCC/Si/Si_mp-149_primitive.cif",
+                               "https://materialsproject.org/materials/mp-149/")
             }
 
 # FCC but the lattice vectors are cubic
@@ -56,7 +58,9 @@ conventional_fcc_cifs = {
             'sodium_chloride': FileUrl("cifs/cubic/FCC/NaCl/NaCl_mp-22862_conventional_standard.cif",
                                         "https://materialsproject.org/materials/mp-22862/"),
             'magnesium_oxide': FileUrl("cifs/cubic/FCC/MgO/MgO_mp-1265_conventional_standard.cif",
-                                       "https://materialsproject.org/materials/mp-1265/")
+                                       "https://materialsproject.org/materials/mp-1265/"),
+            'silicon': FileUrl("cifs/cubic/FCC/Si/Si_mp-149_conventional_standard.cif",
+                               "https://materialsproject.org/materials/mp-149/")
             }
 
 # Crystals without cif files
