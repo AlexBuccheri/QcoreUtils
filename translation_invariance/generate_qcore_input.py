@@ -6,7 +6,13 @@ and details on the app test.
 """
 from translation_invariance.crystals import *
 
-def produce_translation_test(crystal_inputs):
+
+def produce_translation_test(crystal_inputs: list):
+    """
+    Wrapper to add input strings together
+    :param crystal_inputs: list of crystal strings
+    :return: total input string
+    """
     total_input = ''
     for input in crystal_inputs:
         total_input += input() + '\n'
@@ -40,5 +46,6 @@ all_tests = [alpha_N2,               # Simple cubic
 
 print(test_header)
 print(produce_translation_test(all_tests))
+
 #print(produce_translation_test([alpha_N2]))
 

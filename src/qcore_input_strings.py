@@ -5,6 +5,7 @@
 import typing
 
 from src import space_groups, utils
+from src.xtb_potential import PotentialType
 
 
 def atoms_string(n_atoms: int, position_key: str) -> str:
@@ -296,6 +297,11 @@ def xtb_input_string_cleaner(
 
     if sub_commands:
         quit("Need to implement proper treatment of sub-commands")
+
+    if assertions:
+        assert not any(key in PotentialType for key in assertions.keys()), \
+            "assertions dictionary should be passed in with a choice made for xtb PotentialType" \
+            "i.e. assertions[PotentialType]"
 
     crystal['lattice_parameters'] = utils.angstrom_to_bohr(crystal['lattice_parameters'])
 
