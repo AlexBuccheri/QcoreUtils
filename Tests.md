@@ -1,9 +1,11 @@
 
 # List of Bravais Lattices
 1. Simple cubic: 
-    * N2, one more 
+    * alpha-N2, one more 
 2. BCC:
-    * PICK ONE
+    * Many transition metals, i.e. K, however these all correspond to 
+    elemental crystals 
+    * SiO2 zeolite structure 
 3. FCC:
     * silicon, germanium, diamond
     * cubic Boron nitride, copper, MgO, NaCl, PbS, LiH  
@@ -14,7 +16,7 @@
 6. Hexagonal:
     * CdSe, unbuckled graphene
 7. Rhombohedral
-    * MoS2 (download), other
+    * MoS2, other
 8. Simple orthorhombic
     * Pick 2
 9. Base-centred orthorhombic
@@ -54,6 +56,7 @@ correct results
 ### Translational Invariance 
 * Translate all atoms in the cell by some arbitrary amount 
 * Expect the energy to be invariant w.r.t. translation. 
+* TODO Finish adding orthorhombic, monoclinic and triclinic systems 
 
 
 ### Elemental Crystals
@@ -98,8 +101,8 @@ at any point is going to introduce a non-negligible error.
 
 
 ### Energy per atom
-* Energy per atom is conserved as one moves from the primitive unit cell to super cells of increasing
-size.
+* Energy per atom is conserved as one moves from the primitive unit cell to conventional unit cell, and
+subsequently super cells of increasing size.
 
 * Can take any system and increase the super cell integers. k-sampling must be converged in each case 
 although one can reduce the sampling density as the cell gets larger. 
